@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-display: "Cormorant Garamond", Georgia, serif;
+    --font-body: "Jost", system-ui, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Prevents any single wide element from creating a horizontal
+       scrollbar on phones. */
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply bg-black text-ink;
+    font-family: var(--font-body);
+    font-weight: 300;
+    overflow-x: hidden;
+    /* Stops iOS auto-inflating text in landscape */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Give every tap target a comfortable minimum size on touch devices */
+  @media (hover: none) and (pointer: coarse) {
+    button,
+    a[role="button"] {
+      min-height: 40px;
+    }
+  }
+
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-gold;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
