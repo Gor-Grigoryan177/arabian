@@ -52,22 +52,11 @@ export function OrderModal() {
     setPhoneError(pErr);
     if (nErr || pErr) return;
 
-    const webhookUrl = process.env.NEXT_PUBLIC_ORDER_WEBHOOK_URL;
-
-    // No webhook configured (local dev / not yet wired) — behave as before
-    // rather than silently pretending an order was placed.
-    if (!webhookUrl) {
-      close();
-      reset();
-      toast.success(
-        `Order received — we'll contact you shortly about ${productName ?? "your order"}!`
-      );
-      return;
-    }
-
     setSubmitting(true);
     try {
-      const res = await fetch(webhookUrl, {
+      // Posts to our own API route, which relays to n8n server-side.
+      // Keeps the webhook URL off the client entirely.
+      const res = await fetch("/api/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
