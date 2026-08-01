@@ -27,6 +27,7 @@ export function OrderModal() {
   const [quantity, setQuantity] = useState(1);
   const [nameError, setNameError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   function reset() {
     setName("");
@@ -43,7 +44,7 @@ export function OrderModal() {
     }
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const nErr = name.trim() ? null : "Please enter your name";
     const pErr = phoneErrorMessage(phone);
@@ -51,11 +52,46 @@ export function OrderModal() {
     setPhoneError(pErr);
     if (nErr || pErr) return;
 
-    close();
-    reset();
-    toast.success(
-      `Order received — we'll contact you shortly about ${productName ?? "your order"}!`
-    );
+    const webhookUrl = process.env.NEXT_PUBLIC_ORDER_WEBHOOK_URL;
+
+    // No webhook configured (local dev / not yet wired) — behave as before
+    // rather than silently pretending an order was placed.
+    if (!webhookUrl) {
+      close();
+      reset();
+      toast.success(
+        `Order received — we'll contact you shortly about ${productName ?? "your order"}!`
+      );
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: phone.trim(),
+          product: productName ?? "Not specified",
+          quantity,
+        }),
+      });
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+
+      close();
+      reset();
+      toast.success(
+        `Order received — we'll call you shortly about ${productName ?? "your order"}!`
+      );
+    } catch {
+      // Never let the customer believe an order went through when it did not.
+      toast.error(
+        "We couldn't send your order. Please call or message us on Instagram instead."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -140,8 +176,12 @@ export function OrderModal() {
             />
           </div>
 
-          <Button type="submit" className="mt-2 w-full justify-center">
-            Confirm Order
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="mt-2 w-full justify-center disabled:opacity-60"
+          >
+            {submitting ? "Sending…" : "Confirm Order"}
           </Button>
         </form>
       </DialogContent>
