@@ -3,14 +3,19 @@ import { NextResponse } from "next/server";
 /**
  * Server-side order relay.
  *
- * The browser posts here instead of calling n8n directly. Benefits:
- * - The webhook URL is a server-only env var (no NEXT_PUBLIC_ prefix), so
- *   it is never exposed in the client bundle and cannot be scraped and
- *   spammed by anyone who views the page source.
- * - Env var is read at request time, not baked in at build time, so
- *   changing it in Vercel takes effect on the next request — no rebuild.
- * - Input is validated again on the server; the browser cannot be trusted.
+ * The browser posts here instead of calling n8n directly, so the webhook
+ * URL stays server-only (not in the client bundle, not scrapeable) and is
+ * read at request time rather than baked in at build time.
+ *
+ * Input is re-validated here — the browser cannot be trusted.
  */
+
+function str(value: unknown, max: number, fallback = ""): string {
+  return typeof value === "string" && value.trim()
+    ? value.trim().slice(0, max)
+    : fallback;
+}
+
 export async function POST(request: Request) {
   const webhookUrl = process.env.ORDER_WEBHOOK_URL;
 
@@ -22,9 +27,9 @@ export async function POST(request: Request) {
     );
   }
 
-  let payload: unknown;
+  let payload: Record<string, unknown>;
   try {
-    payload = await request.json();
+    payload = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json(
       { ok: false, error: "Invalid request." },
@@ -32,34 +37,57 @@ export async function POST(request: Request) {
     );
   }
 
-  const { name, phone, product, quantity } = (payload ?? {}) as Record<
-    string,
-    unknown
-  >;
+  const name = str(payload.name, 100);
+  const phone = str(payload.phone, 40);
+  const address = str(payload.address, 200);
 
-  if (typeof name !== "string" || !name.trim()) {
+  if (!name) {
     return NextResponse.json(
       { ok: false, error: "Name is required." },
       { status: 400 }
     );
   }
-  if (typeof phone !== "string" || !phone.trim()) {
+  if (!phone) {
     return NextResponse.json(
       { ok: false, error: "Phone is required." },
       { status: 400 }
     );
   }
+  if (!address) {
+    return NextResponse.json(
+      { ok: false, error: "Address is required." },
+      { status: 400 }
+    );
+  }
+
+  const quantity =
+    Number(payload.quantity) > 0
+      ? Math.min(Math.floor(Number(payload.quantity)), 50)
+      : 1;
+  const unitPrice =
+    Number(payload.unitPrice) > 0 ? Number(payload.unitPrice) : 0;
 
   try {
     const res = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name: name.trim().slice(0, 100),
-        phone: phone.trim().slice(0, 40),
-        product:
-          typeof product === "string" ? product.slice(0, 120) : "Not specified",
-        quantity: Number(quantity) > 0 ? Math.min(Number(quantity), 50) : 1,
+        name,
+        phone,
+        address,
+        city: str(payload.city, 60, "Yerevan"),
+        // Recomputed server-side so a tampered client cannot send a fake total.
+        product: str(payload.product, 120, "Not specified"),
+        brand: str(payload.brand, 60),
+        size: str(payload.size, 30),
+        quantity,
+        unitPrice,
+        total: unitPrice * quantity,
+        paymentMethod:
+          payload.paymentMethod === "transfer"
+            ? "Bank transfer"
+            : "Cash on delivery",
+        note: str(payload.note, 500),
       }),
     });
 

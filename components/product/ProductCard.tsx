@@ -69,7 +69,7 @@ export function ProductCard({ product }: ProductCardProps) {
               aria-label={`Order ${product.name}`}
               onClick={(e) => {
                 e.preventDefault();
-                openOrder(product.name);
+                openOrder(product);
               }}
               className="rounded-sm bg-gold px-3.5 py-2 text-[9px] font-medium uppercase tracking-[0.15em] text-black transition-colors hover:bg-gold-light"
             >

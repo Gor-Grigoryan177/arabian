@@ -1,18 +1,19 @@
 "use client";
 
 import { create } from "zustand";
+import type { Product } from "@/types/product";
 
 interface OrderModalState {
   isOpen: boolean;
-  productName: string | null;
-  open: (productName?: string) => void;
+  /** Full product so the review step can show brand, size and total. */
+  product: Product | null;
+  open: (product: Product) => void;
   close: () => void;
 }
 
 export const useOrderModal = create<OrderModalState>((set) => ({
   isOpen: false,
-  productName: null,
-  open: (productName) =>
-    set({ isOpen: true, productName: productName ?? null }),
+  product: null,
+  open: (product) => set({ isOpen: true, product }),
   close: () => set({ isOpen: false }),
 }));

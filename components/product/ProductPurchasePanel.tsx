@@ -75,10 +75,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
       </div>
 
       <div className="mb-8 flex flex-col gap-2.5">
-        <Button
-          onClick={() => openOrder(product.name)}
-          className="justify-center"
-        >
+        <Button onClick={() => openOrder(product)} className="justify-center">
           Order Now
         </Button>
         <a

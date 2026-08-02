@@ -8,33 +8,31 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useOrderModal } from "@/hooks/useOrderModal";
 import { phoneErrorMessage } from "@/lib/validation";
+import { EMPTY_ORDER, type OrderDraft } from "@/types/order";
+import { OrderForm, type OrderErrors } from "./OrderForm";
+import { OrderReview } from "./OrderReview";
 
 /**
- * Simple order-intent form (no live checkout by design — this is a local
- * Armenian retailer; real fulfilment happens over phone/Instagram/DM).
- * Validates client-side and shows a success toast; wire the onSubmit
- * handler to a real backend/webhook when ready to go live.
+ * Two-step order flow: fill in details -> review summary -> send.
+ *
+ * No payment is taken here by design. This is a local Armenian retailer:
+ * the shop calls to confirm, then takes cash on delivery or a bank
+ * transfer. The order is submitted to /api/order, which relays it to n8n
+ * server-side (Google Sheet + Telegram notification).
  */
 export function OrderModal() {
-  const { isOpen, productName, close } = useOrderModal();
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [quantity, setQuantity] = useState(1);
-  const [nameError, setNameError] = useState<string | null>(null);
-  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const { isOpen, product, close } = useOrderModal();
+  const [step, setStep] = useState<"form" | "review">("form");
+  const [draft, setDraft] = useState<OrderDraft>(EMPTY_ORDER);
+  const [errors, setErrors] = useState<OrderErrors>({});
   const [submitting, setSubmitting] = useState(false);
 
   function reset() {
-    setName("");
-    setPhone("");
-    setQuantity(1);
-    setNameError(null);
-    setPhoneError(null);
+    setStep("form");
+    setDraft(EMPTY_ORDER);
+    setErrors({});
   }
 
   function handleOpenChange(open: boolean) {
@@ -44,26 +42,47 @@ export function OrderModal() {
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const nErr = name.trim() ? null : "Please enter your name";
-    const pErr = phoneErrorMessage(phone);
-    setNameError(nErr);
-    setPhoneError(pErr);
-    if (nErr || pErr) return;
+  function patch(update: Partial<OrderDraft>) {
+    setDraft((d) => ({ ...d, ...update }));
+    // Clear the error for any field the user is actively fixing.
+    setErrors((e) => {
+      const next = { ...e };
+      for (const key of Object.keys(update) as (keyof OrderDraft)[])
+        delete next[key];
+      return next;
+    });
+  }
 
+  function handleReview(e: React.FormEvent) {
+    e.preventDefault();
+    const next: OrderErrors = {};
+    if (!draft.name.trim()) next.name = "Please enter your name";
+    const phoneErr = phoneErrorMessage(draft.phone);
+    if (phoneErr) next.phone = phoneErr;
+    if (!draft.address.trim()) next.address = "Please enter a delivery address";
+
+    setErrors(next);
+    if (Object.keys(next).length > 0) return;
+    setStep("review");
+  }
+
+  async function handleConfirm() {
+    if (!product) return;
     setSubmitting(true);
     try {
-      // Posts to our own API route, which relays to n8n server-side.
-      // Keeps the webhook URL off the client entirely.
       const res = await fetch("/api/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: name.trim(),
-          phone: phone.trim(),
-          product: productName ?? "Not specified",
-          quantity,
+          ...draft,
+          name: draft.name.trim(),
+          phone: draft.phone.trim(),
+          address: draft.address.trim(),
+          product: product.name,
+          brand: product.brand,
+          size: product.size,
+          unitPrice: product.price,
+          total: product.price * draft.quantity,
         }),
       });
       if (!res.ok) throw new Error(`Request failed: ${res.status}`);
@@ -71,7 +90,7 @@ export function OrderModal() {
       close();
       reset();
       toast.success(
-        `Order received — we'll call you shortly about ${productName ?? "your order"}!`
+        `Order received — we'll call you shortly about ${product.name}!`
       );
     } catch {
       // Never let the customer believe an order went through when it did not.
@@ -85,94 +104,35 @@ export function OrderModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
         <p className="mb-2 text-[10px] uppercase tracking-[0.25em] text-gold">
-          Place Your Order
+          {step === "form" ? "Your Details" : "Confirm Your Order"}
         </p>
-        <DialogTitle>Order Now</DialogTitle>
+        <DialogTitle>
+          {step === "form" ? "Order Now" : "Review Order"}
+        </DialogTitle>
         <DialogDescription>
-          We&apos;ll confirm and arrange delivery in Yerevan
+          {step === "form"
+            ? "We'll confirm by phone and arrange delivery"
+            : "Please check everything is correct"}
         </DialogDescription>
 
-        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-          <div>
-            <Label htmlFor="order-name">Full Name</Label>
-            <Input
-              id="order-name"
-              value={name}
-              invalid={!!nameError}
-              onChange={(e) => {
-                setName(e.target.value);
-                if (nameError) setNameError(null);
-              }}
-              placeholder="Your name"
-              aria-describedby="order-name-error"
-            />
-            {nameError && (
-              <p
-                id="order-name-error"
-                role="alert"
-                className="mt-1.5 text-[11px] text-[#d97066]"
-              >
-                &#9888; {nameError}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="order-phone">Phone Number</Label>
-            <Input
-              id="order-phone"
-              type="tel"
-              value={phone}
-              invalid={!!phoneError}
-              onChange={(e) => {
-                setPhone(e.target.value);
-                setPhoneError(
-                  phoneErrorMessage(e.target.value) && e.target.value
-                    ? phoneErrorMessage(e.target.value)
-                    : null
-                );
-              }}
-              placeholder="+374 XX XXX XXX"
-              aria-describedby="order-phone-error"
-            />
-            {phoneError && (
-              <p
-                id="order-phone-error"
-                role="alert"
-                className="mt-1.5 text-[11px] text-[#d97066]"
-              >
-                &#9888; {phoneError}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="order-product">Product</Label>
-            <Input id="order-product" value={productName ?? ""} readOnly />
-          </div>
-
-          <div>
-            <Label htmlFor="order-qty">Quantity</Label>
-            <Input
-              id="order-qty"
-              type="number"
-              min={1}
-              max={10}
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-            />
-          </div>
-
-          <Button
-            type="submit"
-            disabled={submitting}
-            className="mt-2 w-full justify-center disabled:opacity-60"
-          >
-            {submitting ? "Sending…" : "Confirm Order"}
-          </Button>
-        </form>
+        {step === "form" ? (
+          <OrderForm
+            draft={draft}
+            errors={errors}
+            onChange={patch}
+            onSubmit={handleReview}
+          />
+        ) : product ? (
+          <OrderReview
+            product={product}
+            draft={draft}
+            submitting={submitting}
+            onBack={() => setStep("form")}
+            onConfirm={handleConfirm}
+          />
+        ) : null}
       </DialogContent>
     </Dialog>
   );
