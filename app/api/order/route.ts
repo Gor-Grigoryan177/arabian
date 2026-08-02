@@ -92,7 +92,12 @@ export async function POST(request: Request) {
     });
 
     if (!res.ok) {
-      console.error("Order webhook responded", res.status);
+      // Log what n8n actually said — a bare status code makes 502s
+      // impossible to diagnose from the Vercel function logs.
+      const detail = await res.text().catch(() => "<no body>");
+      console.error(
+        `Order webhook rejected: status=${res.status} url=${webhookUrl} body=${detail.slice(0, 500)}`
+      );
       return NextResponse.json(
         { ok: false, error: "Could not submit order." },
         { status: 502 }
