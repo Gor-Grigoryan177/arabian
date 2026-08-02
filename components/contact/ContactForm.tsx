@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { contactHandleErrorMessage } from "@/lib/validation";
 
 export function ContactForm() {
+  const [submitting, setSubmitting] = useState(false);
   const [name, setName] = useState("");
   const [handle, setHandle] = useState("");
   const [message, setMessage] = useState("");
@@ -18,7 +19,7 @@ export function ContactForm() {
     message?: string;
   }>({});
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const nameError = name.trim() ? undefined : "Please enter your name";
     const handleError = contactHandleErrorMessage(handle) ?? undefined;
@@ -32,10 +33,29 @@ export function ContactForm() {
     setErrors(nextErrors);
     if (nameError || handleError || messageError) return;
 
-    toast.success("Message sent \u2014 we will reply soon!");
-    setName("");
-    setHandle("");
-    setMessage("");
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          contact: handle.trim(),
+          message: message.trim(),
+        }),
+      });
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+      toast.success("Message sent — we will reply soon!");
+      setName("");
+      setHandle("");
+      setMessage("");
+    } catch {
+      toast.error(
+        "We couldn't send your message. Please contact us on Instagram instead."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -131,8 +151,12 @@ export function ContactForm() {
           )}
         </div>
 
-        <Button type="submit" className="w-full justify-center">
-          Send Message
+        <Button
+          type="submit"
+          disabled={submitting}
+          className="w-full justify-center disabled:opacity-60"
+        >
+          {submitting ? "Sending…" : "Send Message"}
         </Button>
       </form>
     </div>

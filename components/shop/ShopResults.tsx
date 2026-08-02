@@ -48,8 +48,14 @@ export function ShopResults() {
 
   const filtered = useMemo(() => {
     return PRODUCTS.filter((p) => {
+      // A unisex fragrance is wearable by anyone, so it belongs in the
+      // Men and Women results too — filtering "Men" should mean "things a
+      // man could wear", not just products literally tagged Men.
       const genderOk =
-        filters.genders.length === 0 || filters.genders.includes(p.gender);
+        filters.genders.length === 0 ||
+        filters.genders.includes(p.gender) ||
+        (p.gender === "Unisex" &&
+          filters.genders.some((g) => g === "Men" || g === "Women"));
       const brandOk =
         filters.brands.length === 0 || filters.brands.includes(p.brand);
       const typeOk =

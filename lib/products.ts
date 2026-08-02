@@ -23,11 +23,17 @@ export function getNewArrivals(limit = 4) {
   return PRODUCTS.filter((p) => p.isNew).slice(0, limit);
 }
 
+/**
+ * Counts shown on the home category cards. These deliberately include
+ * unisex products in the Men and Women totals, so the number matches what
+ * the shop page actually shows when that category is clicked.
+ */
 export function getCategoryCounts() {
+  const unisex = PRODUCTS.filter((p) => p.gender === "Unisex").length;
   return {
-    Men: PRODUCTS.filter((p) => p.gender === "Men").length,
-    Women: PRODUCTS.filter((p) => p.gender === "Women").length,
-    Unisex: PRODUCTS.filter((p) => p.gender === "Unisex").length,
+    Men: PRODUCTS.filter((p) => p.gender === "Men").length + unisex,
+    Women: PRODUCTS.filter((p) => p.gender === "Women").length + unisex,
+    Unisex: unisex,
   };
 }
 
@@ -74,4 +80,13 @@ export function getQuizRecommendations(answers: {
     ).slice(0, 4);
   }
   return results;
+}
+
+/**
+ * Product featured in the About section. Prefers one with real
+ * photography — a photo always beats the drawn illustration there, and
+ * this upgrades itself as photos are added without touching components.
+ */
+export function getShowcaseProduct(): Product | undefined {
+  return PRODUCTS.find((p) => p.image) ?? PRODUCTS.find((p) => p.id === 1);
 }

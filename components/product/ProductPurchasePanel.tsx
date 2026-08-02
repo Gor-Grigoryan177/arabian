@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Heart, Instagram, Phone } from "lucide-react";
 import type { Product } from "@/types/product";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -9,14 +8,11 @@ import { useHasMounted } from "@/hooks/useHasMounted";
 import { Button } from "@/components/ui/button";
 import { formatAMD, cn } from "@/lib/utils";
 
-const SIZES = ["50ml", "100ml", "Gift Box"];
-
 export function ProductPurchasePanel({ product }: { product: Product }) {
   const mounted = useHasMounted();
   const isWishlisted = useWishlist((s) => s.has(product.id));
   const toggleWishlist = useWishlist((s) => s.toggle);
   const openOrder = useOrderModal((s) => s.open);
-  const [selectedSize, setSelectedSize] = useState(SIZES[0]);
 
   return (
     <div>
@@ -52,26 +48,16 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
         </span>
       </div>
 
-      <div className="mb-7">
-        <p className="mb-2.5 text-[10px] uppercase tracking-[0.2em] text-muted">
-          Select Size
-        </p>
-        <div className="flex gap-2.5">
-          {SIZES.map((size) => (
-            <button
-              key={size}
-              type="button"
-              onClick={() => setSelectedSize(size)}
-              aria-pressed={selectedSize === size}
-              className={cn(
-                "rounded-sm border border-border px-5 py-2 text-xs text-muted transition-colors hover:border-gold hover:text-gold",
-                selectedSize === size && "border-gold text-gold"
-              )}
-            >
-              {size}
-            </button>
-          ))}
-        </div>
+      {/* The catalogue stores one size per product, so this is displayed
+          rather than selected — a picker here would be decorative and
+          would not affect the price or the order. */}
+      <div className="mb-7 flex items-center gap-2">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-muted">
+          Size
+        </span>
+        <span className="rounded-sm border border-gold-dim px-3 py-1.5 text-xs text-gold">
+          {product.size}
+        </span>
       </div>
 
       <div className="mb-8 flex flex-col gap-2.5">
