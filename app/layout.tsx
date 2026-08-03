@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ScrollToTopButton } from "@/components/layout/ScrollToTopButton";
 import { RecentlyViewedBar } from "@/components/layout/RecentlyViewedBar";
 import { OrderModal } from "@/components/shared/OrderModal";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 import { Toaster } from "@/components/shared/Toaster";
 import "./globals.css";
 
@@ -101,6 +102,7 @@ export default function RootLayout({
         <RecentlyViewedBar />
         <ScrollToTopButton />
         <OrderModal />
+        <ChatWidget />
         <Toaster />
       </body>
     </html>
