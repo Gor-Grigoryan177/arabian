@@ -104,7 +104,7 @@ export function ChatWidget() {
         role="dialog"
         aria-label="Fragrance assistant"
         className={cn(
-          "fixed bottom-40 right-4 z-[70] flex w-[min(370px,calc(100vw-2rem))] flex-col overflow-hidden rounded-lg border border-border bg-black shadow-2xl transition-all duration-300 sm:bottom-36 sm:right-6",
+          "fixed bottom-[9.5rem] right-4 z-[70] flex w-[min(370px,calc(100vw-2rem))] flex-col overflow-hidden rounded-lg border border-border bg-black shadow-2xl transition-all duration-300 sm:bottom-[8.5rem] sm:right-6",
           open
             ? "pointer-events-auto translate-y-0 opacity-100"
             : "pointer-events-none translate-y-3 opacity-0"
