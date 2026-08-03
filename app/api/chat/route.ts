@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildChatSystemPrompt } from "@/lib/ai/chatPrompt";
+import { rateLimit, clientKey } from "@/lib/rateLimit";
 
 /**
  * Live chat endpoint. Calls DeepSeek server-side so the API key never
@@ -8,6 +9,10 @@ import { buildChatSystemPrompt } from "@/lib/ai/chatPrompt";
  */
 
 const MAX_MESSAGE_LENGTH = 800;
+// 20 messages / 10 min is generous for a real conversation (typically
+// 5-15 messages) while capping what a spam script can spend.
+const RATE_LIMIT = 20;
+const RATE_WINDOW_MS = 10 * 60 * 1000;
 const MAX_HISTORY = 12; // caps token spend and keeps replies focused
 
 interface ChatMessage {
@@ -22,6 +27,21 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { ok: false, error: "Chat is not available right now." },
       { status: 503 }
+    );
+  }
+
+  const limit = rateLimit(clientKey(request), RATE_LIMIT, RATE_WINDOW_MS);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "You've sent a lot of messages — please wait a moment, or contact us on Instagram.",
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      }
     );
   }
 

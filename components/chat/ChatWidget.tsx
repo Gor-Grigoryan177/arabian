@@ -65,7 +65,17 @@ export function ChatWidget() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: next.filter((m) => m !== GREETING) }),
       });
-      const data = (await res.json()) as { ok: boolean; reply?: string };
+      const data = (await res.json()) as {
+        ok: boolean;
+        reply?: string;
+        error?: string;
+      };
+      // Show the server's own message for rate limiting so the visitor is
+      // told to wait rather than seeing a generic failure.
+      if (res.status === 429 && data.error) {
+        setMessages((m) => [...m, { role: "assistant", content: data.error! }]);
+        return;
+      }
       if (!res.ok || !data.reply) throw new Error("no reply");
       setMessages((m) => [...m, { role: "assistant", content: data.reply! }]);
     } catch {

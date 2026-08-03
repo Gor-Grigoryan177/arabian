@@ -5,6 +5,24 @@ interface ChatBubbleProps {
   content: string;
 }
 
+/**
+ * The model emphasises product names with Markdown bold. Rendering it is
+ * better than stripping it — the perfume name is the useful part of the
+ * answer — but only **bold** is supported, so no untrusted HTML is ever
+ * inserted.
+ */
+function renderContent(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+    part.startsWith("**") && part.endsWith("**") && part.length > 4 ? (
+      <strong key={i} className="font-medium text-gold">
+        {part.slice(2, -2)}
+      </strong>
+    ) : (
+      part
+    )
+  );
+}
+
 export function ChatBubble({ role, content }: ChatBubbleProps) {
   const isUser = role === "user";
   return (
@@ -13,11 +31,11 @@ export function ChatBubble({ role, content }: ChatBubbleProps) {
         className={cn(
           "max-w-[85%] whitespace-pre-wrap rounded-lg px-3.5 py-2.5 text-[13px] leading-relaxed",
           isUser
-            ? "rounded-br-sm bg-gold text-black"
+            ? "rounded-br-sm bg-gold font-medium text-black"
             : "rounded-bl-sm border border-border bg-surface2 text-ink"
         )}
       >
-        {content}
+        {isUser ? content : renderContent(content)}
       </div>
     </div>
   );
