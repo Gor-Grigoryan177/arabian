@@ -1,4 +1,9 @@
 import { NextResponse } from "next/server";
+import { rateLimit, clientKey } from "@/lib/rateLimit";
+
+// 5 orders/hour per visitor. A real person places one, maybe two; this stops a script flooding the shop's Telegram and Sheet with junk.
+const ORDER_LIMIT = 5;
+const ORDER_WINDOW_MS = 60 * 60 * 1000;
 
 /**
  * Server-side order relay.
@@ -17,6 +22,21 @@ function str(value: unknown, max: number, fallback = ""): string {
 }
 
 export async function POST(request: Request) {
+  const limit = rateLimit(clientKey(request), ORDER_LIMIT, ORDER_WINDOW_MS);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Too many orders from this device. Please call or message us on Instagram.",
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      }
+    );
+  }
+
   const webhookUrl = process.env.ORDER_WEBHOOK_URL;
 
   if (!webhookUrl) {

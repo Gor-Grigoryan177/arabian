@@ -34,12 +34,19 @@ export interface Product {
    * Leave undefined until you have licensed/own photography.
    */
   image?: string;
+  /**
+   * Out-of-stock products stay visible (they still drive interest and SEO)
+   * but cannot be ordered. Omitted means in stock, so existing products
+   * need no change.
+   */
+  inStock?: boolean;
 }
 
 export interface ShopFilterState {
   genders: Gender[];
   brands: Brand[];
   types: ScentType[];
+  sizes: string[];
   maxPrice: number;
   search: string;
 }

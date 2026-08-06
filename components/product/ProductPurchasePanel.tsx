@@ -4,6 +4,7 @@ import { Heart, Instagram, Phone } from "lucide-react";
 import type { Product } from "@/types/product";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useOrderModal } from "@/hooks/useOrderModal";
+import { isInStock } from "@/lib/products";
 import { useHasMounted } from "@/hooks/useHasMounted";
 import { Button } from "@/components/ui/button";
 import { formatAMD, cn } from "@/lib/utils";
@@ -13,6 +14,7 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
   const isWishlisted = useWishlist((s) => s.has(product.id));
   const toggleWishlist = useWishlist((s) => s.toggle);
   const openOrder = useOrderModal((s) => s.open);
+  const inStock = isInStock(product);
 
   return (
     <div>
@@ -61,9 +63,18 @@ export function ProductPurchasePanel({ product }: { product: Product }) {
       </div>
 
       <div className="mb-8 flex flex-col gap-2.5">
-        <Button onClick={() => openOrder(product)} className="justify-center">
-          Order Now
+        <Button
+          onClick={() => openOrder(product)}
+          disabled={!inStock}
+          className="justify-center disabled:cursor-not-allowed disabled:bg-border disabled:text-muted"
+        >
+          {inStock ? "Order Now" : "Currently Sold Out"}
         </Button>
+        {!inStock && (
+          <p className="text-center text-[11px] text-muted">
+            Message us on Instagram to be told when it&apos;s back.
+          </p>
+        )}
         <a
           href="https://instagram.com/arabian_nights_arm"
           target="_blank"

@@ -1,4 +1,9 @@
 import { NextResponse } from "next/server";
+import { rateLimit, clientKey } from "@/lib/rateLimit";
+
+// 5 messages/hour per visitor — generous for a real enquiry, useless for spam.
+const CONTACT_LIMIT = 5;
+const CONTACT_WINDOW_MS = 60 * 60 * 1000;
 
 /**
  * Server-side contact relay. Same pattern as /api/order: keeps the n8n
@@ -9,6 +14,21 @@ function str(value: unknown, max: number): string {
 }
 
 export async function POST(request: Request) {
+  const limit = rateLimit(clientKey(request), CONTACT_LIMIT, CONTACT_WINDOW_MS);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Too many messages. Please try again later or reach us on Instagram.",
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      }
+    );
+  }
+
   const webhookUrl = process.env.CONTACT_WEBHOOK_URL;
 
   if (!webhookUrl) {

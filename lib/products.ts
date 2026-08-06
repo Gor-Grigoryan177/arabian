@@ -90,3 +90,11 @@ export function getQuizRecommendations(answers: {
 export function getShowcaseProduct(): Product | undefined {
   return PRODUCTS.find((p) => p.image) ?? PRODUCTS.find((p) => p.id === 1);
 }
+
+/** Sizes available across the catalogue, for the shop filter. */
+export const SIZES = Array.from(new Set(PRODUCTS.map((p) => p.size))).sort();
+
+/** Products default to in stock unless explicitly marked otherwise. */
+export function isInStock(product: Product): boolean {
+  return product.inStock !== false;
+}

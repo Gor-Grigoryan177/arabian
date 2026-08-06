@@ -19,7 +19,7 @@ const ITEMS: ContactItemData[] = [
     icon: Phone,
     label: "Phone",
     value: "+374 XX XXX XXX",
-    sub: "Mon\u2013Sat, 10:00 \u2013 20:00",
+    sub: "Every day, 10:00 – 22:00",
   },
   {
     icon: MapPin,

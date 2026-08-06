@@ -17,6 +17,7 @@ const DEFAULT_FILTERS: ShopFilterState = {
   genders: [],
   brands: [],
   types: [],
+  sizes: [],
   maxPrice: 40000,
   search: "",
 };
@@ -60,6 +61,8 @@ export function ShopResults() {
         filters.brands.length === 0 || filters.brands.includes(p.brand);
       const typeOk =
         filters.types.length === 0 || filters.types.includes(p.type);
+      const sizeOk =
+        filters.sizes.length === 0 || filters.sizes.includes(p.size);
       const priceOk = p.price <= filters.maxPrice;
       const q = filters.search.toLowerCase();
       const searchOk =
@@ -67,7 +70,7 @@ export function ShopResults() {
         p.name.toLowerCase().includes(q) ||
         p.brand.toLowerCase().includes(q) ||
         p.type.toLowerCase().includes(q);
-      return genderOk && brandOk && typeOk && priceOk && searchOk;
+      return genderOk && brandOk && typeOk && sizeOk && priceOk && searchOk;
     });
   }, [filters]);
 

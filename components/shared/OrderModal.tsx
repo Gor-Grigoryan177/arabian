@@ -85,6 +85,11 @@ export function OrderModal() {
           total: product.price * draft.quantity,
         }),
       });
+      if (res.status === 429) {
+        const data = (await res.json()) as { error?: string };
+        toast.error(data.error ?? "Please wait a moment before trying again.");
+        return;
+      }
       if (!res.ok) throw new Error(`Request failed: ${res.status}`);
 
       close();

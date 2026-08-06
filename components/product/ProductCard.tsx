@@ -8,6 +8,7 @@ import { ProductImage } from "@/components/shared/ProductImage";
 import { StarRating } from "@/components/shared/StarRating";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useOrderModal } from "@/hooks/useOrderModal";
+import { isInStock } from "@/lib/products";
 import { useHasMounted } from "@/hooks/useHasMounted";
 import { formatAMD, cn } from "@/lib/utils";
 import { useTranslations } from "@/hooks/useLocale";
@@ -22,6 +23,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const toggleWishlist = useWishlist((s) => s.toggle);
   const openOrder = useOrderModal((s) => s.open);
   const t = useTranslations();
+  const inStock = isInStock(product);
 
   return (
     <motion.article
@@ -37,10 +39,16 @@ export function ProductCard({ product }: ProductCardProps) {
       >
         <div className="relative h-[180px] overflow-hidden bg-surface2 sm:h-[260px]">
           <ProductImage product={product} />
-          {product.badge && (
-            <span className="absolute left-3 top-3 rounded-sm bg-gold px-2.5 py-1 text-[9px] font-medium uppercase tracking-[0.15em] text-black">
-              {product.badge}
+          {!inStock ? (
+            <span className="absolute left-3 top-3 rounded-sm bg-surface2 px-2.5 py-1 text-[9px] font-medium uppercase tracking-[0.15em] text-muted ring-1 ring-border">
+              Out of stock
             </span>
+          ) : (
+            product.badge && (
+              <span className="absolute left-3 top-3 rounded-sm bg-gold px-2.5 py-1 text-[9px] font-medium uppercase tracking-[0.15em] text-black">
+                {product.badge}
+              </span>
+            )
           )}
         </div>
 
@@ -66,14 +74,19 @@ export function ProductCard({ product }: ProductCardProps) {
             </span>
             <button
               type="button"
-              aria-label={`Order ${product.name}`}
+              disabled={!inStock}
+              aria-label={
+                inStock
+                  ? `Order ${product.name}`
+                  : `${product.name} is out of stock`
+              }
               onClick={(e) => {
                 e.preventDefault();
-                openOrder(product);
+                if (inStock) openOrder(product);
               }}
-              className="rounded-sm bg-gold px-3.5 py-2 text-[9px] font-medium uppercase tracking-[0.15em] text-black transition-colors hover:bg-gold-light"
+              className="rounded-sm bg-gold px-3.5 py-2 text-[9px] font-medium uppercase tracking-[0.15em] text-black transition-colors hover:bg-gold-light disabled:cursor-not-allowed disabled:bg-border disabled:text-muted"
             >
-              {t.common.order}
+              {inStock ? t.common.order : "Sold out"}
             </button>
           </div>
         </div>

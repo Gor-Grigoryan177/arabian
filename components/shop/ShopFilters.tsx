@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { BRANDS, GENDERS, SCENT_TYPES } from "@/lib/products";
+import { BRANDS, GENDERS, SCENT_TYPES, SIZES } from "@/lib/products";
 import { formatAMD } from "@/lib/utils";
 import type { ShopFilterState } from "@/types/product";
 
@@ -70,6 +70,20 @@ export function ShopFilters({ filters, onChange }: ShopFiltersProps) {
         </div>
       </FilterGroup>
 
+      <FilterGroup title="Size">
+        {SIZES.map((s) => (
+          <FilterCheckbox
+            key={s}
+            id={`size-${s}`}
+            label={s}
+            checked={filters.sizes.includes(s)}
+            onChange={() =>
+              onChange({ ...filters, sizes: toggleValue(filters.sizes, s) })
+            }
+          />
+        ))}
+      </FilterGroup>
+
       <FilterGroup title="Fragrance Type">
         {SCENT_TYPES.map((t) => (
           <FilterCheckbox
@@ -92,6 +106,7 @@ export function ShopFilters({ filters, onChange }: ShopFiltersProps) {
             genders: [],
             brands: [],
             types: [],
+            sizes: [],
             maxPrice: 40000,
             search: filters.search,
           })
