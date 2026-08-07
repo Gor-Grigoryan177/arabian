@@ -6,6 +6,7 @@ import { ScrollToTopButton } from "@/components/layout/ScrollToTopButton";
 import { RecentlyViewedBar } from "@/components/layout/RecentlyViewedBar";
 import { OrderModal } from "@/components/shared/OrderModal";
 import { ChatWidget } from "@/components/chat/ChatWidget";
+import { Clarity } from "@/components/analytics/Clarity";
 import { Toaster } from "@/components/shared/Toaster";
 import "./globals.css";
 
@@ -103,6 +104,7 @@ export default function RootLayout({
         <ScrollToTopButton />
         <OrderModal />
         <ChatWidget />
+        <Clarity />
         <Toaster />
       </body>
     </html>
