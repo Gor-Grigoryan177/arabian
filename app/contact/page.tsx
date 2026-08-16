@@ -5,7 +5,7 @@ import { ContactForm } from "@/components/contact/ContactForm";
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
-    "Get in touch with Arabian Nights ARM \u2014 Instagram, phone, and our Yerevan store locations.",
+    "Get in touch with Arabian Nights ARM — Instagram, phone, and our Yerevan store locations.",
 };
 
 export default function ContactPage() {

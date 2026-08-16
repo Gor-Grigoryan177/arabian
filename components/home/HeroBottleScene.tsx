@@ -48,9 +48,11 @@ export function HeroBottleScene() {
 
     let bottleCenter = { x: 0, y: 0 };
     let zoneVisible = false;
+    let sectionHeight = 1;
 
     function measure() {
       if (!canvas || !section || !zone) return;
+      sectionHeight = section.offsetHeight || 1;
       canvas.width = section.offsetWidth * dpr;
       canvas.height = section.offsetHeight * dpr;
       canvas.style.width = `${section.offsetWidth}px`;
@@ -83,9 +85,11 @@ export function HeroBottleScene() {
 
     let scrollIntensity = 0;
     function onScroll() {
-      if (!section) return;
+      // Uses the height cached in measure() rather than reading offsetHeight
+      // here — a layout read on every scroll event is what caused the
+      // original scroll jank, and this handler fires constantly.
       scrollIntensity = Math.min(
-        Math.max(window.scrollY / (section as HTMLElement).offsetHeight, 0),
+        Math.max(window.scrollY / sectionHeight, 0),
         1
       );
     }

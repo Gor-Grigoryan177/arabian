@@ -30,7 +30,7 @@ const SITE_URL = "https://arabian-nights.am";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Arabian Nights ARM \u2014 Premium Arabic Perfumes in Armenia",
+    default: "Arabian Nights ARM — Premium Arabic Perfumes in Armenia",
     template: "%s | Arabian Nights ARM",
   },
   description:
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     "Premium perfumes Armenia",
   ],
   openGraph: {
-    title: "Arabian Nights ARM \u2014 Premium Arabic Perfumes in Armenia",
+    title: "Arabian Nights ARM — Premium Arabic Perfumes in Armenia",
     description:
       "Authentic Lattafa, Hayati, Afnan & Ard Al Zaafaran perfumes. Fast delivery across Armenia.",
     url: SITE_URL,
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Arabian Nights ARM \u2014 Premium Arabic Perfumes in Armenia",
+    title: "Arabian Nights ARM — Premium Arabic Perfumes in Armenia",
     description: "Authentic Arabic perfumes delivered across Armenia.",
   },
   icons: {

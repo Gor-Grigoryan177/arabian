@@ -32,14 +32,6 @@ export function AboutBottleShowcase() {
         sizes="(max-width: 1024px) 100vw, 600px"
         className="relative h-full w-full object-contain p-8"
       />
-
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-sm border border-gold/25 bg-black/60 px-5 py-2.5 text-center backdrop-blur-sm">
-        <p className="text-[10px] uppercase tracking-[0.25em] text-gold">
-          {product.brand}
-        </p>
-        <p className="font-display text-base text-warmwhite">{product.name}</p>
-        <p className="text-[10px] text-muted">EDP &middot; {product.size}</p>
-      </div>
     </div>
   );
 }

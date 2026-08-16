@@ -25,7 +25,7 @@ const ITEMS: ContactItemData[] = [
     icon: MapPin,
     label: "Location",
     value: "Yerevan, Armenia",
-    sub: "Visit us in store \u2014 address on request",
+    sub: "Visit us in store — address on request",
   },
   {
     icon: Truck,

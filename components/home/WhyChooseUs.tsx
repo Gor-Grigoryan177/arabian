@@ -8,7 +8,7 @@ const FEATURES = [
   {
     icon: ShieldCheck,
     title: "Authentic Arabic",
-    desc: "Every perfume sourced directly from the finest Arabic fragrance houses \u2014 Lattafa, Afnan, Hayati and more.",
+    desc: "Every perfume sourced directly from the finest Arabic fragrance houses — Lattafa, Afnan, Hayati and more.",
   },
   {
     icon: Sparkles,
@@ -23,7 +23,7 @@ const FEATURES = [
   {
     icon: MessageCircle,
     title: "Personal Consultation",
-    desc: "Not sure which scent is yours? Contact us on Instagram \u2014 we'll guide you to your signature fragrance.",
+    desc: "Not sure which scent is yours? Contact us on Instagram — we'll guide you to your signature fragrance.",
   },
 ];
 

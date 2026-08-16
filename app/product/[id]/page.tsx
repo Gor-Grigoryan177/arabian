@@ -27,10 +27,10 @@ export async function generateMetadata({
 
   return {
     title: `${product.name} by ${product.brand}`,
-    description: `${product.name} by ${product.brand} \u2014 ${product.type} fragrance, ${product.size}. ${formatAMD(product.price)}. Order now with fast delivery across Armenia.`,
+    description: `${product.name} by ${product.brand} — ${product.type} fragrance, ${product.size}. ${formatAMD(product.price)}. Order now with fast delivery across Armenia.`,
     openGraph: {
       title: `${product.name} by ${product.brand} | Arabian Nights ARM`,
-      description: `${product.type} fragrance \u2014 ${formatAMD(product.price)}`,
+      description: `${product.type} fragrance — ${formatAMD(product.price)}`,
     },
   };
 }

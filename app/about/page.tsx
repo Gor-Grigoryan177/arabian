@@ -6,7 +6,7 @@ import { AboutStory } from "@/components/about/AboutStory";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "The story behind Arabian Nights ARM \u2014 bringing authentic Arabic perfumery to Armenia.",
+    "The story behind Arabian Nights ARM — bringing authentic Arabic perfumery to Armenia.",
 };
 
 export default function AboutPage() {
